@@ -1,0 +1,51 @@
+name: Branch review (no deployment)
+on:
+  push:
+    branches: ['codex/iphone-placement-ux']
+permissions:
+  contents: read
+concurrency:
+  group: branch-review-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Export reproducible review workspace
+        run: |
+          mkdir -p /tmp/review-workspace
+          git archive HEAD | tar -x -C /tmp/review-workspace
+          cp -a node_modules /tmp/review-workspace/node_modules
+          git rev-parse HEAD > /tmp/review-workspace/REVIEW_COMMIT.txt
+          tar -czf /tmp/review-workspace.tar.gz -C /tmp/review-workspace .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: review-workspace
+          path: /tmp/review-workspace.tar.gz
+          retention-days: 3
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e -- --workers=3
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: branch-playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: sake-clash-branch-preview
+          path: dist/
+          retention-days: 14
