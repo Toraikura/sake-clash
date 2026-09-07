@@ -1,5 +1,7 @@
 # SAKE CLASH 検証記録
 
+これは2026-09-07の初回ローカル完成時点の記録です。GitHub公開後の検証はActionsとPUBLICATION.mdを参照してください。
+
 2026-09-07 / macOS / Node.js v26.7.0 / Google Chrome / Playwright 1.63.0。
 
 ## 状態
