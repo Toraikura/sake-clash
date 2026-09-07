@@ -2,6 +2,8 @@
 
 - **遊ぶ： https://toraikura.github.io/sake-clash/**
 - **次の評価・改良方針：[docs/NEXT_STEPS.md](docs/NEXT_STEPS.md)**
+- 管理方針：GitHubを正本として、変更前にremoteの最新版とローカル差分を確認します。
+- 別作品：[SHUBO RUNを遊ぶ](https://toraikura.github.io/shubo-run/) / [ソース](https://github.com/Toraikura/shubo-run)
 - **編集エージェント向け：[AGENTS.md](AGENTS.md)**
 - mainへの更新後、GitHub Actionsが検証・ビルドしてPagesへ反映します。
 - 現在はCPU戦。今後の設計はiPhone縦持ち・タッチ操作を最優先にします。

@@ -1,5 +1,7 @@
 # SAKE CLASH development agreements
 
+- GitHub is the canonical source and history: https://github.com/Toraikura/sake-clash. Before editing, fetch and inspect the remote branch and local changes. Never overwrite work from another environment. Use local checkouts, and push completed authorized changes so work is not left only locally.
+
 - This repository contains only SAKE CLASH. Preserve the existing playable behavior before redesigning. Never modify other games or sites.
 - Primary target: iPhone portrait, touch and thumb interaction. Keyboard support is secondary. Do not rely on hover. Account for safe areas, dynamic Safari viewport, touch occlusion, accidental scrolling and app-switch pause/resume.
 - Read README.md and docs/NEXT_STEPS.md first. Future ideas are proposals, not already implemented features or approval to implement everything.
