@@ -1,0 +1,257 @@
+{
+  "baseline": "19320dc2269e0bbb825389202e9ad590583c4036",
+  "scenarios": [
+    {
+      "brew": "sokujo",
+      "deck": "balanced",
+      "difficulty": "practice",
+      "seed": 1,
+      "sha256": "8092ecedc99cbc29943854e9a871ad35df7e05bc26a85f3d062ff00d48f27b1f"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "balanced",
+      "difficulty": "practice",
+      "seed": 260907,
+      "sha256": "6b0fede7d1d767a4c34a8e7cc0b32a5c43fb32cec3e47c430335bf11176ef830"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "balanced",
+      "difficulty": "standard",
+      "seed": 1,
+      "sha256": "ae7dbc59e2b9864c5612531dd81775946dd0c9fc117fff967fa6ba4b2de9f0ec"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "balanced",
+      "difficulty": "standard",
+      "seed": 260907,
+      "sha256": "2b6740cf2e57e9098def933ac784197b60bbcfa2be280cbe329899d3455bd9b0"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "balanced",
+      "difficulty": "expert",
+      "seed": 1,
+      "sha256": "c584a3d421ec1afcb0042e3016b2ae6a78bae12ac6874c8e11097629385019ce"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "balanced",
+      "difficulty": "expert",
+      "seed": 260907,
+      "sha256": "69ca02d108ea5811d7519a9153b1c1f27272e6629f119296ed21c532f431ebc8"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "battery",
+      "difficulty": "practice",
+      "seed": 1,
+      "sha256": "8f81ca9f365705d9f03091338ac8689a53e5417fc9706eec12ea50f70a97096c"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "battery",
+      "difficulty": "practice",
+      "seed": 260907,
+      "sha256": "f969bc28cc00566dc6f94ca28578cb5b52d5803efd518b796a1b5cfb418908b9"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "battery",
+      "difficulty": "standard",
+      "seed": 1,
+      "sha256": "2731f23e1a8cb029c98907809fa0bebdab318d27a984e3c69bb66864dbb42f13"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "battery",
+      "difficulty": "standard",
+      "seed": 260907,
+      "sha256": "50d032d6abc845a4b36c4f7ffd920620cac7e0cba6720a5c41f7afef37ed3425"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "battery",
+      "difficulty": "expert",
+      "seed": 1,
+      "sha256": "a5bbeca79870e0fbe8c42e407c2a78171fbd534ad212ce68b4377373c7b37bca"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "battery",
+      "difficulty": "expert",
+      "seed": 260907,
+      "sha256": "93151da0bea47dc9686f3c81d7deaeba70acca0f1bdb1c6818ad599942c14f4a"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "rush",
+      "difficulty": "practice",
+      "seed": 1,
+      "sha256": "ef291c1dbec5b7b70e9c45cc9eb3e4e620161fa3aa7169b05d869052fe8e7134"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "rush",
+      "difficulty": "practice",
+      "seed": 260907,
+      "sha256": "57cdda2469f54715eb2ff24309ef2e5779ab4e83b483d6148f859e8fb044464f"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "rush",
+      "difficulty": "standard",
+      "seed": 1,
+      "sha256": "62fa1fa395fe806a7af14a375856a652fccda868667e2c96f7f00f15c2ebae6a"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "rush",
+      "difficulty": "standard",
+      "seed": 260907,
+      "sha256": "3181a922e952c229f57ac85573ce51d44c8e0202a0e8ba5fb16b2d2012077044"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "rush",
+      "difficulty": "expert",
+      "seed": 1,
+      "sha256": "f55bc15ae207d377739b5a5b529e4665e3057c2c549384ed6d2db8410c1be3db"
+    },
+    {
+      "brew": "sokujo",
+      "deck": "rush",
+      "difficulty": "expert",
+      "seed": 260907,
+      "sha256": "6d6c1e073ca42d49f1ed58d825c04451f309ab42a8b6267bf80f43a12a7debea"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "balanced",
+      "difficulty": "practice",
+      "seed": 1,
+      "sha256": "c9fd79feeb42355bf3c6df003d0a291d2ff6c5431641056608799218d43e0c1f"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "balanced",
+      "difficulty": "practice",
+      "seed": 260907,
+      "sha256": "9134ddf82a5a2f3cfecddb476e810abd1e9a35815c2d70b8862c4ac83826122a"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "balanced",
+      "difficulty": "standard",
+      "seed": 1,
+      "sha256": "9895c89285e72d0df4cbf9e2f5dd119f2b4eba36b6a62fce607ba5985553e5e9"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "balanced",
+      "difficulty": "standard",
+      "seed": 260907,
+      "sha256": "6dedb2f2821c7c3cea59dca3d7047569f9c8234be0a554413e8e50ba2851607b"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "balanced",
+      "difficulty": "expert",
+      "seed": 1,
+      "sha256": "4b0dfafc342d5bd34acb8e66b76a67bf431077367e77910eff9933faee15a7f1"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "balanced",
+      "difficulty": "expert",
+      "seed": 260907,
+      "sha256": "6947343b0251c9076ccec67a96c8cb0f581bd624aad8a556755a509c7eb381d4"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "battery",
+      "difficulty": "practice",
+      "seed": 1,
+      "sha256": "7ca9e606848907936fed833e960d0db5364a28a2e08ec64f2340cd6d0d02b28b"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "battery",
+      "difficulty": "practice",
+      "seed": 260907,
+      "sha256": "da279a49e06db53d8f796b048f77c5944e47b431c02d7efcb7a338c4e585eca0"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "battery",
+      "difficulty": "standard",
+      "seed": 1,
+      "sha256": "f163afe6be458d8ed4780fe77345183c7b2c76461df7e4c6518d9337f74cdefc"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "battery",
+      "difficulty": "standard",
+      "seed": 260907,
+      "sha256": "10a0cee7e6ef734d3e145662279078e90ea419b4733c6fc0d50c609f779b9665"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "battery",
+      "difficulty": "expert",
+      "seed": 1,
+      "sha256": "50a57b3ff116443c5d268c5650786c30ef504fdcd2d389e71db4c7a46899fa6b"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "battery",
+      "difficulty": "expert",
+      "seed": 260907,
+      "sha256": "018394479a21daaff2accdf262f207fb32e1b6951e6076053401d0aa65de4bde"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "rush",
+      "difficulty": "practice",
+      "seed": 1,
+      "sha256": "2a3adbfd46d80de272057acdc23dd52e14067eedbe6ca8d63d0ce207d6f93525"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "rush",
+      "difficulty": "practice",
+      "seed": 260907,
+      "sha256": "695a5df0f35a45cf7241ea0241523e255730397a6a8ff32c431cf745edc52121"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "rush",
+      "difficulty": "standard",
+      "seed": 1,
+      "sha256": "0cf38c619a6d900f3e94a2e1b4a180c6a427cc840762b6fd46ee59c6dc492b07"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "rush",
+      "difficulty": "standard",
+      "seed": 260907,
+      "sha256": "63e2320fc1cd9269b7e424e50bb54cb3a0f568d067aa3a80bc1bdc60d5645969"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "rush",
+      "difficulty": "expert",
+      "seed": 1,
+      "sha256": "12bc22b80094cc63609d5ad01ad176bb045c0d05959dbed9c4af16722c8713db"
+    },
+    {
+      "brew": "kimoto",
+      "deck": "rush",
+      "difficulty": "expert",
+      "seed": 260907,
+      "sha256": "194215ec28e211eb35c38190b104ed4c9c258907093b6af3fc421470b75643eb"
+    }
+  ]
+}

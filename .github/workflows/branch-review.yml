@@ -1,0 +1,44 @@
+name: Branch review (no deployment)
+on:
+  push:
+    branches: ['codex/iphone-placement-ux']
+permissions:
+  contents: read
+concurrency:
+  group: branch-review-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e -- --workers=3
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: branch-playwright-report
+          path: |
+            playwright-report/
+            test-results/
+            docs/screenshots/
+          retention-days: 14
+      - name: Build record-isolated review package
+        run: npm run build
+        env:
+          VITE_REVIEW: 'true'
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: sake-clash-branch-preview
+          path: dist/
+          retention-days: 14

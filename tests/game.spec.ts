@@ -204,17 +204,17 @@ test('automatic pause, reduced motion, corrupt storage, rules and new course', a
     }),
   );
   await page.getByRole('button', { name: '対戦を再開' }).click();
+  // Battle is fixed-height: scrolling must neither hide the hand nor pause play.
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.clock.runFor(100);
+  await expect(page.getByTestId('arena')).toHaveAttribute('data-status', 'playing');
+  await page.getByRole('button', { name: '一時停止', exact: true }).click();
+  await page.getByRole('button', { name: 'この対戦をやめる' }).click();
   await page.getByText('6枚のカードと相性').click();
   await page.getByText('勝敗・補給・配置ルール').click();
   await page.getByText('速醸・生酛の出典とゲームの境界').click();
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await page.clock.runFor(100);
-  await expect(page.getByTestId('arena')).toHaveAttribute(
-    'data-status',
-    'paused',
-  );
   await expect(page.getByText('出典で確認：', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: '対戦を再開' }).click();
+  await page.getByRole('button', { name: '対戦開始' }).click();
   await page.clock.runFor(76000);
   await page.getByRole('button', { name: '仕込み・手札を変える' }).click();
   await expect(page.getByTestId('arena')).toHaveAttribute(
