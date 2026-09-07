@@ -1,0 +1,50 @@
+{
+  "verifiedAt": "2026-09-07T11:44:30.235454+00:00",
+  "name": "SAKE CLASH",
+  "localUrl": "http://127.0.0.1:4188/",
+  "lint": "passed",
+  "typecheck": "passed",
+  "unitTests": 17,
+  "e2e": {
+    "passed": 18,
+    "failed": 0,
+    "skipped": 0,
+    "viewports": [
+      "1440x1000",
+      "360x800 touch emulation",
+      "390x844 touch emulation"
+    ],
+    "realTimeTests": 3,
+    "lastRun": {
+      "status": "passed",
+      "failedTests": []
+    }
+  },
+  "preservedOriginalFiles": 1048,
+  "brewModels": {
+    "sokujo": {
+      "initialEnergy": 8,
+      "damageReduction": 0.1
+    },
+    "kimoto": {
+      "initialEnergy": 5,
+      "initialDamageReduction": 0,
+      "matureDamageReduction": 0.35,
+      "cultureTarget": 100
+    }
+  },
+  "allBrewEffects": "fictional game coefficients",
+  "build": {
+    "dist/index.html": "8e2b7a3c65cfd9251b2c647f75b45489e056e76ceeaf77ad88bab66dab535b5e",
+    "dist/assets/index-BQLYd2A5.js": "d9ce52e3c9b03469eff94d8f15950dde2d26f8ec60ffe8d0fe0859dd46494d0c",
+    "dist/assets/index-DIqV0fjF.css": "1465c1b1ef1cc78d35cb245cb5786222132947203821a3c59d9a00d4c260552d"
+  },
+  "source": {
+    "src/main.tsx": "73700627d16a03d9ec4bbf5efe6489a9b5d9704c27ea45793426234a92229d41",
+    "src/storage.ts": "8c6b2af1c419c1d0cb887159d9c8be57435858757d0771aaa2bbb2fd43154653",
+    "src/model.ts": "8404d2baabd114cb2b98250ad409819ae2b901cbf4adc72638bd7c98229fcfd6",
+    "src/style.css": "8f3ddc76cc09add5ae1af6a0407acb5f6118ce03a81f263a177ec3a3f2074a51",
+    "src/render.ts": "44b18d16d8ff07679d19d2fe88dc1fbed5762809d8a345a404d3ceac98ef8bf5"
+  },
+  "publication": "not performed"
+}

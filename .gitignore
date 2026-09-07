@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.cache/
+test-results/
+playwright-report/
+
+# Local preservation inventory of unrelated projects
+docs/baseline.json
+scripts/verify-baseline.py
+.env
+.env.*
+.DS_Store
