@@ -53,7 +53,10 @@ export function usePlacement(
     if (match.current.status !== 'playing' || match.current.hand[s.index] !== s.card) { finish(true); return; }
     keyboardPoint.current = p;
     const success = deploy(match.current, s.index, p.x, p.y);
-    finish(success); callbacks.current.update(); canvas.current?.focus({ preventScroll: true });
+    finish(success);
+    // Keep the rejected point visible until the next gesture; denial must not be silent.
+    if (!success) cursor.current = p;
+    callbacks.current.update(); canvas.current?.focus({ preventScroll: true });
   }, [match, finish, canvas]);
   useEffect(() => {
     const down = (e: PointerEvent) => {
