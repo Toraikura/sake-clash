@@ -1,17 +1,18 @@
-import { W, H, canPlace, type Match, type Point, CARDS } from './model';
-const COLORS = {
-  1: { tile: '#69c5ab', edge: '#137765', dark: '#075d51', light: '#bbf6d4' },
-  2: { tile: '#eb9475', edge: '#a3422b', dark: '#843b2c', light: '#ffd4a6' },
-} as const;
+import { W, H, AREAS, clamp, type Match, type Point } from './model';
+import { COLORS, glyph } from './art';
+import { preview, ray, type Preview } from './preview';
+let cached: { match: Match; key: string; value: Preview } | null = null;
+let magnifier: HTMLCanvasElement | null = null;
 export function draw(
   canvas: HTMLCanvasElement,
   g: Match,
   cursor: Point | null,
   selected: number | null,
   reduced: boolean,
+  showLens = false,
 ) {
   const ctx = canvas.getContext('2d');
-  if (!ctx) return;
+  if (!ctx || canvas.clientWidth <= 0) return;
   const width = canvas.clientWidth,
     ratio = Math.min(devicePixelRatio || 1, 2),
     height = (width * H) / W;
@@ -68,95 +69,17 @@ export function draw(
     ctx.globalAlpha = 1;
   }
   for (const u of g.units) {
-    const c = COLORS[u.side];
-    ctx.save();
-    ctx.translate(u.x, u.y);
-    ctx.fillStyle = '#173b3040';
-    ctx.beginPath();
-    ctx.ellipse(0.17, 0.4, 0.85, 0.45, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.lineWidth = 0.12;
-    if (u.kind === 'tokkuri') {
-      ctx.fillStyle = c.dark;
-      ctx.strokeStyle = '#26352d';
-      ctx.beginPath();
-      ctx.roundRect(-0.75, -0.6, 1.5, 1.35, 0.3);
-      ctx.fill();
-      ctx.stroke();
-      ctx.rotate(u.angle);
-      ctx.fillStyle = c.edge;
-      ctx.beginPath();
-      ctx.arc(0, 0, 0.6, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = c.light;
-      ctx.beginPath();
-      ctx.roundRect(-0.1, -0.28, 1.5, 0.56, 0.13);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = c.dark;
-      ctx.fillRect(1.15, -0.26, 0.22, 0.52);
-    } else if (u.kind === 'sugidama') {
-      ctx.fillStyle = c.dark;
-      ctx.strokeStyle = '#26352d';
-      ctx.beginPath();
-      ctx.roundRect(-1, -0.65, 2, 1.3, 0.25);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = c.light;
-      ctx.beginPath();
-      ctx.arc(0, -0.14, 0.62, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.strokeStyle = c.edge;
-      ctx.lineWidth = 0.2;
-      ctx.beginPath();
-      ctx.moveTo(-0.3, -0.14);
-      ctx.lineTo(0.3, -0.14);
-      ctx.moveTo(0, -0.44);
-      ctx.lineTo(0, 0.16);
-      ctx.stroke();
-    } else if (u.kind === 'koji') {
-      ctx.rotate(reduced ? 0 : u.angle);
-      ctx.fillStyle = c.dark;
-      ctx.strokeStyle = '#26352d';
-      ctx.beginPath();
-      ctx.roundRect(-0.8, -0.8, 1.6, 1.6, 0.2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = c.light;
-      ctx.beginPath();
-      ctx.arc(0, 0, 0.48, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      for (let i = 0; i < 4; i++) {
-        ctx.rotate(Math.PI / 2);
-        ctx.fillStyle = c.edge;
-        ctx.fillRect(0.6, -0.19, 0.6, 0.38);
-      }
-    } else {
-      ctx.fillStyle = c.edge;
-      ctx.strokeStyle = '#26352d';
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 0.48, 0.62, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = c.light;
-      ctx.beginPath();
-      ctx.arc(0.3, -0.42, 0.22, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#fff9e8';
-      ctx.beginPath();
-      ctx.arc(-0.16, -0.08, 0.085, 0, Math.PI * 2);
-      ctx.arc(0.13, -0.08, 0.085, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    ctx.save(); ctx.translate(u.x, u.y);
+    // Different team marks remain readable without the hue distinction.
+    ctx.fillStyle = COLORS[u.side].light; ctx.strokeStyle = COLORS[u.side].dark;
+    ctx.lineWidth = .12; ctx.beginPath();
+    if (u.side === 1) ctx.arc(0, .15, .88, 0, Math.PI * 2);
+    else { ctx.moveTo(0, -.85); ctx.lineTo(1, .15); ctx.lineTo(0, 1.15); ctx.lineTo(-1, .15); ctx.closePath(); }
+    ctx.fill(); ctx.stroke();
+    glyph(ctx, u.kind, u.side, u.angle);
     ctx.restore();
-    ctx.fillStyle = '#173f3580';
-    ctx.fillRect(u.x - 0.6, u.y - 1.1, 1.2, 0.14);
-    ctx.fillStyle = '#fff8dc';
-    ctx.fillRect(u.x - 0.6, u.y - 1.1, 1.2 * Math.max(0, u.hp / u.maxHp), 0.14);
+    ctx.fillStyle = '#173f3580'; ctx.fillRect(u.x - .6, u.y - 1.1, 1.2, .14);
+    ctx.fillStyle = '#fff8dc'; ctx.fillRect(u.x - .6, u.y - 1.1, 1.2 * Math.max(0, u.hp / u.maxHp), .14);
   }
   for (const b of g.shots) {
     const c = COLORS[b.side];
@@ -177,23 +100,75 @@ export function draw(
     }
   }
   if (cursor && selected !== null && g.status === 'playing') {
-    const valid = !canPlace(g, selected, cursor.x, cursor.y);
-    ctx.strokeStyle = valid ? '#fff9dc' : '#732d23';
-    ctx.lineWidth = 0.14;
-    ctx.setLineDash([0.3, 0.18]);
-    ctx.beginPath();
-    ctx.arc(
-      cursor.x,
-      cursor.y,
-      g.hand[selected] === 'kai' ? 3 : 1.1,
-      0,
-      Math.PI * 2,
-    );
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.font = 'bold .8px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = valid ? '#fff9dc' : '#732d23';
-    ctx.fillText(CARDS[g.hand[selected]].icon, cursor.x, cursor.y + 0.28);
-  }
+    const key = `${Math.floor(g.tick / 3)}:${selected}:${g.hand[selected]}:${cursor.x}:${cursor.y}`;
+    if (!cached || cached.match !== g || cached.key !== key)
+      cached = { match: g, key, value: preview(g, selected, cursor) };
+    const info = cached.value, kind = g.hand[selected];
+    const color = info.error ? '#8c2e26' : '#fff9dc';
+    const circle = (radius: number, dash: boolean) => {
+      ctx.strokeStyle = color; ctx.lineWidth = .16;
+      ctx.setLineDash(dash ? [.3, .18] : []);
+      ctx.beginPath(); ctx.arc(cursor.x, cursor.y, radius, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    };
+    if (kind === 'kai') { circle(AREAS.kaiPaint, false); circle(AREAS.kaiDamage, true); }
+    else if (kind === 'sugidama') circle(AREAS.support, false);
+    else if (info.error) circle(1.2, true);
+    if (!info.error) {
+      for (const m of info.moves) arrow(ctx, [m.from, m.to], true);
+      for (const b of info.shots) arrow(ctx, ray(b), false);
+      ctx.globalAlpha = .85;
+      if (info.units.length) for (const u of info.units) {
+        ctx.save(); ctx.translate(u.x, u.y); glyph(ctx, kind, 1, u.angle); ctx.restore();
+      }
+      else { ctx.save(); ctx.translate(cursor.x, cursor.y); glyph(ctx, kind); ctx.restore(); }
+      ctx.globalAlpha = 1;
+    } else {
+      ctx.strokeStyle = color; ctx.lineWidth = .2; ctx.beginPath();
+      ctx.moveTo(cursor.x - .55, cursor.y - .55); ctx.lineTo(cursor.x + .55, cursor.y + .55);
+      ctx.moveTo(cursor.x + .55, cursor.y - .55); ctx.lineTo(cursor.x - .55, cursor.y + .55); ctx.stroke();
+    }
+    // An exact touch location: only the magnified VIEW is offset, never the deployment.
+    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(cursor.x, cursor.y, .12, 0, Math.PI * 2); ctx.fill();
+    if (showLens) lens(ctx, canvas, cursor, !info.error, unit, ratio);
+    canvas.dataset.previewValid = String(!info.error);
+  } else delete canvas.dataset.previewValid;
+}
+
+function arrow(ctx: CanvasRenderingContext2D, points: Point[], moving: boolean) {
+  if (points.length < 2) return;
+  ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.setLineDash(moving ? [.35, .23] : []);
+  ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y);
+  for (const p of points.slice(1)) ctx.lineTo(p.x, p.y);
+  ctx.strokeStyle = '#213a32a0'; ctx.lineWidth = .26; ctx.stroke();
+  ctx.strokeStyle = moving ? '#fff9dc' : '#ffd063'; ctx.lineWidth = .12; ctx.stroke();
+  ctx.setLineDash([]);
+  const a = points[points.length - 2], b = points[points.length - 1];
+  const direction = Math.atan2(b.y - a.y, b.x - a.x);
+  ctx.translate(b.x, b.y); ctx.rotate(direction);
+  ctx.fillStyle = moving ? '#fff9dc' : '#ffd063';
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-.55, -.27); ctx.lineTo(-.55, .27); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function lens(ctx: CanvasRenderingContext2D, board: HTMLCanvasElement, p: Point, valid: boolean, unit: number, ratio: number) {
+  if (!magnifier) magnifier = document.createElement('canvas');
+  magnifier.width = 180; magnifier.height = 128;
+  const copy = magnifier.getContext('2d'); if (!copy) return;
+  const sourceW = 7, sourceH = 5;
+  const sx = clamp(p.x - sourceW / 2, 0, W - sourceW), sy = clamp(p.y - sourceH / 2, 0, H - sourceH);
+  copy.drawImage(board, sx * unit * ratio, sy * unit * ratio, sourceW * unit * ratio, sourceH * unit * ratio, 0, 0, 180, 128);
+  const w = Math.min(112 / unit, W * .47), h = 86 / unit, gap = 36 / unit;
+  const x = clamp(p.x - w / 2, .3, W - w - .3);
+  let y = p.y - gap - h;
+  if (y < .3) y = p.y + gap;
+  y = clamp(y, .3, Math.max(.3, H - h - .3));
+  ctx.save(); ctx.strokeStyle = valid ? '#fff9dc' : '#8c2e26'; ctx.lineWidth = .12;
+  ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(x + w / 2, y < p.y ? y + h : y); ctx.stroke();
+  ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.roundRect(x, y, w, h, .3); ctx.fill(); ctx.stroke();
+  ctx.save(); ctx.beginPath(); ctx.roundRect(x + .12, y + .12, w - .24, h - .24, .2); ctx.clip();
+  ctx.drawImage(magnifier, x + .12, y + .12, w - .24, h - 20 / unit);
+  ctx.restore();
+  ctx.fillStyle = '#213a32'; ctx.font = `bold ${10 / unit}px sans-serif`; ctx.textAlign = 'center';
+  ctx.fillText(valid ? '離して配置 · 初動の予測' : '× ここには置けません', x + w / 2, y + h - 6 / unit);
+  ctx.restore();
 }
