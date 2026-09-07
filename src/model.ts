@@ -3,6 +3,8 @@ export const W = 24,
   H = 34,
   DT = 1 / 30,
   DURATION = 75;
+// Shared geometry: values are unchanged from v1.0.0.
+export const AREAS = { kaiPaint: 3, kaiDamage: 3.4, support: 3.1, wall: 0.15 } as const;
 export type Side = 1 | 2;
 export type Status = 'ready' | 'playing' | 'paused' | 'won' | 'lost' | 'draw';
 export type CardId = 'tokkuri' | 'yeast' | 'koji' | 'sugidama' | 'awa' | 'kai';
@@ -443,10 +445,10 @@ export function deploy(
   paint(g, p, 0.95, side);
   effect(g, p, 1, side);
   if (kind === 'kai') {
-    paint(g, p, 3, side);
-    effect(g, p, 3, side);
+    paint(g, p, AREAS.kaiPaint, side);
+    effect(g, p, AREAS.kaiPaint, side);
     for (const u of g.units)
-      if (u.side !== side && dist(u, p) < 3.4) damage(g, u, 85);
+      if (u.side !== side && dist(u, p) < AREAS.kaiDamage) damage(g, u, 85);
   } else if (kind === 'awa') {
     const dir = side === 1 ? -1 : 1;
     for (let i = 0; i < 7; i++)
@@ -541,7 +543,8 @@ function nearest(g: Match, u: Unit) {
     }
   return { target, d: min };
 }
-function updateUnits(g: Match) {
+// Also used on a cloned match for the non-mutating initial-action preview.
+export function updateUnits(g: Match) {
   for (const u of g.units) {
     if (u.hp <= 0) continue;
     u.life -= DT;
@@ -617,7 +620,7 @@ function updateUnits(g: Match) {
         u.fire = 0.8;
       } else if (u.kind === 'sugidama') {
         for (const v of g.units)
-          if (v.side === u.side && dist(v, u) < 3.1)
+          if (v.side === u.side && dist(v, u) < AREAS.support)
             v.hp = Math.min(v.maxHp, v.hp + 8);
         paint(g, u, 1.3, u.side);
         u.fire = 1.3;
@@ -676,13 +679,13 @@ export function step(g: Match) {
     for (let j = 0; j < parts && b.life > 0; j++) {
       b.x += (b.vx * DT) / parts;
       b.y += (b.vy * DT) / parts;
-      if (b.x < 0.15 || b.x > W - 0.15) {
-        b.x = clamp(b.x, 0.15, W - 0.15);
+      if (b.x < AREAS.wall || b.x > W - AREAS.wall) {
+        b.x = clamp(b.x, AREAS.wall, W - AREAS.wall);
         b.vx *= -1;
         b.bounces--;
       }
-      if (b.y < 0.15 || b.y > H - 0.15) {
-        b.y = clamp(b.y, 0.15, H - 0.15);
+      if (b.y < AREAS.wall || b.y > H - AREAS.wall) {
+        b.y = clamp(b.y, AREAS.wall, H - AREAS.wall);
         b.vy *= -1;
         b.bounces--;
       }
