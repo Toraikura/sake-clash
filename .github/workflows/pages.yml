@@ -9,6 +9,9 @@ permissions:
 concurrency:
   group: pages-${{ github.ref }}
   cancel-in-progress: true
+env:
+  # Tested revision from PR #1. Publishing a preview does not merge its game code.
+  IPHONE_PREVIEW_REF: 9e391336f4b4dceee217289cc1100e5a1d55885a
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -30,6 +33,93 @@ jobs:
         with:
           name: playwright-report
           path: playwright-report/
+      - name: Keep checksums of the existing game
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: find dist -type f -print0 | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/main-game.sha256"
+      - name: Check out the approved iPhone preview separately
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.IPHONE_PREVIEW_REF }}
+          path: .iphone-source
+          persist-credentials: false
+      - name: Build the record-isolated preview
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        working-directory: .iphone-source
+        env:
+          VITE_REVIEW: 'true'
+        run: |
+          npm ci
+          npm run build
+      - name: Add preview without replacing the existing game
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: |
+          test ! -e dist/preview/iphone
+          mkdir -p dist/preview/iphone
+          cp -a .iphone-source/dist/. dist/preview/iphone/
+          sha256sum --check "$RUNNER_TEMP/main-game.sha256"
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          root = Path('dist')
+          preview = root / 'preview/iphone'
+          html = preview / 'index.html'
+          html.write_text(html.read_text().replace('</head>', '<meta name="robots" content="noindex,nofollow"/></head>'))
+          manifest = {
+              'deploymentCommit': os.environ['GITHUB_SHA'],
+              'previewCommit': os.environ['IPHONE_PREVIEW_REF'],
+              'recordStorage': 'sat-sake-clash:v1:iphone-review',
+              'files': {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+                        for p in sorted(root.rglob('*')) if p.is_file()}
+          }
+          (preview / 'publish-manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+          PY
+      - name: Smoke-test the nested preview with Chromium touch input
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: |
+          node --input-type=module <<'JS'
+          import { spawn } from 'node:child_process';
+          import assert from 'node:assert/strict';
+          import { chromium } from '@playwright/test';
+          const server = spawn('python3', ['-m', 'http.server', '4189', '--bind', '127.0.0.1', '--directory', 'dist']);
+          const origin = 'http://127.0.0.1:4189';
+          let browser;
+          try {
+            let ready = false;
+            for (let i = 0; i < 30; i++) {
+              try { ready = (await fetch(origin)).ok; } catch {}
+              if (ready) break;
+              await new Promise(resolve => setTimeout(resolve, 200));
+            }
+            assert(ready, 'Static server did not start');
+            browser = await chromium.launch();
+            const context = await browser.newContext({viewport: {width: 375, height: 550}, isMobile: true, hasTouch: true});
+            const page = await context.newPage();
+            const errors = [];
+            page.on('pageerror', e => errors.push(e.message));
+            await page.goto(`${origin}/preview/iphone/`);
+            await page.getByText('改良版プレビュー · 現行版の記録は変更しません', {exact: true}).waitFor();
+            await page.getByRole('button', {name: '対戦開始'}).tap();
+            const arena = page.getByTestId('arena');
+            await page.waitForFunction(() => document.querySelector('[data-testid="arena"]')?.getAttribute('data-status') === 'playing');
+            const box = await arena.boundingBox();
+            assert(box && box.y >= 0 && box.y + box.height <= 550, 'Arena does not fit');
+            for (let i = 0; i < 4; i++) {
+              const card = await page.getByTestId(`card-${i}`).boundingBox();
+              assert(card && card.y >= 0 && card.y + card.height <= 550, 'Hand does not fit');
+            }
+            await page.getByTestId('card-0').tap();
+            await page.touchscreen.tap(box.x + box.width * .4, box.y + box.height * .75);
+            await page.waitForFunction(() => document.querySelector('[data-testid="arena"]')?.getAttribute('data-played') === '1');
+            await page.getByRole('button', {name: '一時停止', exact: true}).tap();
+            await page.getByRole('button', {name: '対戦を再開'}).waitFor();
+            assert.deepEqual(errors, []);
+            console.log('PASS: /preview/iphone/ loads its assets, fits 375x550, deploys with touch, and pauses. Chromium emulation, not iPhone Safari.');
+          } finally {
+            if (browser) await browser.close();
+            server.kill();
+          }
+          JS
       - uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         with:
@@ -47,3 +137,42 @@ jobs:
     steps:
       - uses: actions/deploy-pages@v4
         id: deployment
+      - name: Verify both public pages and their assets
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, time
+          from urllib.request import Request, urlopen
+          from urllib.parse import urljoin
+          base = os.environ['PAGE_URL'].rstrip('/') + '/'
+          sha = os.environ['GITHUB_SHA']
+          def fetch(path):
+              req = Request(urljoin(base, path) + '?deployment=' + sha, headers={'Cache-Control': 'no-cache'})
+              with urlopen(req, timeout=30) as response:
+                  if response.status != 200:
+                      raise RuntimeError(f'{path}: HTTP {response.status}')
+                  return response.read()
+          for attempt in range(18):
+              try:
+                  manifest = json.loads(fetch('preview/iphone/publish-manifest.json'))
+                  if manifest['deploymentCommit'] != sha:
+                      raise RuntimeError('Deployment is not yet visible')
+                  if manifest['previewCommit'] != os.environ['IPHONE_PREVIEW_REF']:
+                      raise RuntimeError('Unexpected preview revision')
+                  for path, expected in manifest['files'].items():
+                      actual = hashlib.sha256(fetch(path)).hexdigest()
+                      if actual != expected:
+                          raise RuntimeError(f'{path}: content hash differs')
+                  print('VERIFIED existing game:', base)
+                  print('VERIFIED iPhone preview:', urljoin(base, 'preview/iphone/'))
+                  print('All published HTML/CSS/JS content hashes match the built artifact.')
+                  with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+                      summary.write(f'## Public links\n- Existing game: {base}\n- iPhone preview: {base}preview/iphone/\n\nPreview revision: `{manifest["previewCommit"]}`. HTTP and content hashes verified. iPhone Safari remains untested.\n')
+                  break
+              except Exception as error:
+                  if attempt == 17:
+                      raise
+                  print(f'Propagation check {attempt + 1}: {error}')
+                  time.sleep(5)
+          PY
