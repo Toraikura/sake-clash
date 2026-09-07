@@ -23,6 +23,8 @@ export default defineConfig({
   },
   projects: [
     { name: 'desktop', use: { viewport: { width: 1440, height: 1000 } } },
+    { name: 'mobile-375-short', use: { viewport: { width: 375, height: 550 }, hasTouch: true, isMobile: true } },
+    { name: 'mobile-375', use: { viewport: { width: 375, height: 667 }, hasTouch: true, isMobile: true } },
     {
       name: 'mobile-360',
       use: {

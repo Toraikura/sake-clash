@@ -17,18 +17,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Export reproducible review workspace
-        run: |
-          mkdir -p /tmp/review-workspace
-          git archive HEAD | tar -x -C /tmp/review-workspace
-          cp -a node_modules /tmp/review-workspace/node_modules
-          git rev-parse HEAD > /tmp/review-workspace/REVIEW_COMMIT.txt
-          tar -czf /tmp/review-workspace.tar.gz -C /tmp/review-workspace .
-      - uses: actions/upload-artifact@v4
-        with:
-          name: review-workspace
-          path: /tmp/review-workspace.tar.gz
-          retention-days: 3
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
@@ -42,7 +30,12 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            docs/screenshots/
           retention-days: 14
+      - name: Build record-isolated review package
+        run: npm run build
+        env:
+          VITE_REVIEW: 'true'
       - uses: actions/upload-artifact@v4
         if: success()
         with:
